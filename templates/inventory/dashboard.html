@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>📦 Inventory Dashboard</h1>
+
+<div class="grid">
+
+    <div class="card">
+        <h3>Total Products</h3>
+        <h1>{{ total_products }}</h1>
+    </div>
+
+    <div class="card">
+        <h3>Low Stock Alerts</h3>
+        {% for p in low_stock %}
+            <p style="color:red;">{{ p.name }} ({{ p.stock }})</p>
+        {% empty %}
+            <p>No low stock 🚀</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+<hr>
+
+<h2>All Products</h2>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+    </tr>
+
+    {% for p in products %}
+    <tr>
+        <td>{{ p.name }}</td>
+        <td>${{ p.price }}</td>
+        <td>{{ p.stock }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<style>
+.grid {
+    display: flex;
+    gap: 20px;
+}
+.card {
+    padding: 20px;
+    background: #111;
+    color: white;
+    border-radius: 10px;
+}
+table {
+    width: 100%;
+    margin-top: 20px;
+}
+</style>
+
+{% endblock %}

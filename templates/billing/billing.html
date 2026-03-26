@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Choose Plan</h2>
+
+{% for p in plans %}
+
+<div class="card">
+
+<h3>{{ p.name }}</h3>
+
+<p>${{ p.price }}</p>
+
+<p>Users: {{ p.max_users }}</p>
+
+<p>Products: {{ p.max_products }}</p>
+
+<button onclick="subscribe('{{ p.stripe_price_id }}')">
+
+Subscribe
+
+</button>
+
+</div>
+
+{% endfor %}
+
+<script>
+
+async function subscribe(price){
+
+let res=await fetch("/billing/checkout/",{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json",
+
+"X-CSRFToken":"{{ csrf_token }}"
+
+},
+
+body:JSON.stringify({
+
+price_id:price
+
+})
+
+})
+
+let data=await res.json()
+
+window.location=data.checkout
+
+}
+
+</script>
+
+{% endblock %}

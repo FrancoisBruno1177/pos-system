@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>POS Terminal</h2>
+
+<div class="products">
+
+{% for p in products %}
+
+<button onclick="addToCart('{{p.id}}','{{p.name}}',{{p.price}})">
+
+{{p.name}} - ${{p.price}}
+
+</button>
+
+{% endfor %}
+
+</div>
+
+<h3>Cart</h3>
+
+<ul id="cart"></ul>
+
+<h3>Total: $<span id="total">0</span></h3>
+
+<button onclick="checkout()">Checkout</button>
+
+<script src="/static/js/pos.js"></script>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+<h2>AI Sales Analytics</h2>
+<canvas id="salesChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+new Chart(document.getElementById("salesChart"),{
+type:"line",
+data:{
+labels:{{ labels|safe }},
+datasets:[{
+label:"Sales",
+data:{{ data|safe }},
+borderColor:"#22c55e",
+fill:true
+}]
+}
+})
+</script>
+
+{% include "components/help_widget.html" %}
+{% endblock %}

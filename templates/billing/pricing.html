@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>POSIFY Plans</title>
+
+<link rel="stylesheet" href="{% static 'css/pricing.css' %}">
+
+</head>
+
+<body>
+
+<h1 class="title">POSIFY Plans</h1>
+
+<div class="plans">
+
+{% for plan in plans %}
+
+<div class="plan-card">
+
+<h2>{{ plan.name }}</h2>
+
+<p class="price">${{ plan.price }}</p>
+
+<p>Max Users: {{ plan.max_users }}</p>
+
+<button>Subscribe</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

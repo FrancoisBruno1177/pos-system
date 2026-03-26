@@ -1,0 +1,27 @@
+<style>
+
+body{
+
+width:280px;
+
+font-family:monospace;
+
+}
+
+</style>
+
+<h3>POSIFY</h3>
+
+<p>Receipt</p>
+
+<hr>
+
+{% for item in sale.items.all %}
+
+<p>{{ item.product.name }}  x{{ item.quantity }}</p>
+
+{% endfor %}
+
+<hr>
+
+<p>Total: {{ sale.total }}</p>

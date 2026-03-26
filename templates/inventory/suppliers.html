@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>🏢 Suppliers</h1>
+
+<form method="POST" class="supplier-form">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="Supplier Name" required>
+    <input type="text" name="phone" placeholder="Phone" required>
+    <button type="submit">Add Supplier</button>
+</form>
+
+<hr>
+
+<h2>Existing Suppliers</h2>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Phone</th>
+    </tr>
+    {% for s in suppliers %}
+    <tr>
+        <td>{{ s.name }}</td>
+        <td>{{ s.phone }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<style>
+.supplier-form input, .supplier-form button {
+    margin: 5px;
+    padding: 8px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid #ccc;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+</style>
+
+{% endblock %}

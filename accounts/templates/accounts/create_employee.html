@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Employee</title>
+</head>
+<body>
+
+<h2>Create Employee</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Email:</label><br>
+    <input type="email" name="email" required><br><br>
+
+    <label>Password:</label><br>
+    <input type="password" name="password" required><br><br>
+
+    <label>Role:</label><br>
+    <select name="role">
+        <option value="MANAGER">Manager</option>
+        <option value="CASHIER">Cashier</option>
+    </select><br><br>
+
+    <button type="submit">Create Employee</button>
+</form>
+
+</body>
+</html>

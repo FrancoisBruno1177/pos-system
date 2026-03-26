@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>📦 Inventory Dashboard</h1>
+
+<div class="dashboard-cards">
+    <div class="card">
+        <h3>Total Products</h3>
+        <h2>{{ products_count }}</h2>
+        <a href="{% url 'product_list' %}">View Products</a>
+    </div>
+    <div class="card">
+        <h3>Total Suppliers</h3>
+        <h2>{{ suppliers_count }}</h2>
+        <a href="{% url 'supplier_list' %}">View Suppliers</a>
+    </div>
+</div>
+
+<style>
+.dashboard-cards {
+    display: flex;
+    gap: 20px;
+}
+.card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+}
+.card a {
+    display: inline-block;
+    margin-top: 10px;
+    text-decoration: none;
+    color: #007bff;
+}
+</style>
+
+{% endblock %}

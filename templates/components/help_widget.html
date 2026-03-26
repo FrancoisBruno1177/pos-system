@@ -1,0 +1,42 @@
+<div id="helpWidget">
+<button onclick="toggleHelp()">💬</button>
+
+<div id="helpBox">
+<h3>POSIFY Support</h3>
+
+<p>Need assistance?</p>
+
+<p>Email: support@posify.com</p>
+
+</div>
+</div>
+
+<style>
+#helpWidget{
+position:fixed;
+bottom:20px;
+right:20px;
+}
+
+#helpWidget button{
+background:#22c55e;
+border:none;
+padding:15px;
+border-radius:50%;
+}
+
+#helpBox{
+display:none;
+background:#020617;
+padding:15px;
+border-radius:10px;
+margin-top:10px;
+}
+</style>
+
+<script>
+function toggleHelp(){
+let box=document.getElementById("helpBox")
+box.style.display = box.style.display==="block" ? "none" : "block"
+}
+</script>

@@ -1,0 +1,18 @@
+<body onload="window.print()">
+
+<h2>POSIFY RECEIPT</h2>
+
+<p>Sale #{{ sale.id }}</p>
+<p>Date: {{ sale.created_at }}</p>
+
+<hr>
+
+{% for item in sale.items.all %}
+<p>{{ item.product.name }} x{{ item.quantity }}</p>
+{% endfor %}
+
+<hr>
+
+<h3>Total: ${{ sale.total }}</h3>
+
+</body>

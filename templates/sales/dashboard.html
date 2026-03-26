@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Sales Dashboard</h2>
+
+<p>Total Sales: {{ total }}</p>
+
+{% for sale in sales %}
+<div>
+    Sale #{{ sale.id }} - {{ sale.total }}
+</div>
+{% endfor %}
+
+{% endblock %}

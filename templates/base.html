@@ -1,0 +1,99 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>POSIFY</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    font-family:Poppins;
+    background:#0f172a;
+    color:#fff;
+}
+
+.sidebar{
+    width:220px;
+    height:100vh;
+    position:fixed;
+    background:#020617;
+    padding:20px;
+}
+
+.sidebar a{
+    display:block;
+    color:#94a3b8;
+    margin:15px 0;
+    text-decoration:none;
+}
+
+.sidebar a:hover{
+    color:#22c55e;
+}
+
+.main{
+    margin-left:240px;
+    padding:20px;
+}
+
+.card{
+    background:#020617;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px #000;
+    margin-bottom:20px;
+}
+
+button{
+    background:#22c55e;
+    border:none;
+    padding:10px;
+    color:#fff;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+input{
+    padding:10px;
+    margin:5px;
+    border-radius:5px;
+    border:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+ <h2>POSIFY</h2>
+    
+        <a href="/dashboard/">{% trans "Dashboard" %}</a>
+        <a href="/inventory/">{% trans "Inventory" %}</a>
+        <a href="/sales/pos/">{% trans "POS" %}</a>
+        <a href="/billing/">{% trans "Billing" %}</a> 
+        <a href="/billing/pricing/">{% trans "Pricing" %}</a> 
+        <a href="/ai/">{% trans "AI" %}</a>
+        <a href="/logout/">{% trans "Logout" %}</a>
+        <a href="{% include "components/help_widget.html" %}"</a>
+    
+
+<form action="/i18n/setlang/" method="post">
+    {% csrf_token %}
+    <select name="language" onchange="this.form.submit()">
+        <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+        <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>Français</option>
+    </select>
+</form>
+
+
+</div>
+
+<div class="main">
+{% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

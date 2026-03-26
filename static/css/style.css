@@ -1,0 +1,39 @@
+body {
+    margin:0;
+    font-family:Segoe UI;
+    background:#0f0f1f;
+    color:white;
+}
+
+nav {
+    background:#111;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    box-shadow:0 0 20px #00f7ff;
+}
+
+nav a {
+    color:#00f7ff;
+    margin-left:15px;
+    text-decoration:none;
+}
+
+nav a:hover {
+    text-shadow:0 0 10px #ff00ff;
+}
+
+.container {
+    padding:30px;
+}
+
+button {
+    background:#00f7ff;
+    border:none;
+    padding:10px 20px;
+    cursor:pointer;
+}
+
+button:hover {
+    background:#ff00ff;
+}

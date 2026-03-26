@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">    
+<title>POSIFY Login</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at top, #0f0f1a, #050508);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial;
+    color: white;
+    overflow: hidden;
+}
+
+/* Animated glowing background */
+body::before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, #00f0ff, #8a2eff, #00f0ff);
+    animation: rotate 10s linear infinite;
+    opacity: 0.15;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Card */
+.login-box {
+    position: relative;
+    background: rgba(10,10,20,0.9);
+    padding: 40px;
+    border-radius: 15px;
+    width: 350px;
+    text-align: center;
+    box-shadow: 0 0 20px #00f0ff;
+}
+
+/* Title */
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+    color: #00f0ff;
+    text-shadow: 0 0 10px #00f0ff;
+}
+
+/* Subtitle */
+.subtitle {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #aaa;
+}
+
+/* Inputs */
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    outline: none;
+    border-radius: 8px;
+    background: #111;
+    color: white;
+    box-shadow: 0 0 5px #00f0ff;
+}
+
+/* Password toggle */
+.password-box {
+    position: relative;
+}
+
+.toggle {
+    position: absolute;
+    right: 10px;
+    top: 14px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #00f0ff;
+}
+
+/* Button */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(45deg, #00f0ff, #8a2eff);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00f0ff;
+}
+
+/* Hover */
+button:hover {
+    opacity: 0.9;
+}
+
+/* Forgot */
+.forgot {
+    font-size: 12px;
+    margin-top: 10px;
+    color: #aaa;
+}
+
+.forgot a {
+    color: #aaa;
+    text-decoration: none;
+}
+
+.forgot a:hover {
+    color: #00f0ff;
+    text-shadow: 0 0 5px #00f0ff;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+    <div class="logo">POSIFY</div>
+    <div class="subtitle">Welcome, please sign in to continue</div>
+
+    <form method="POST"  action="{% url 'login' %}">
+        {% csrf_token %}
+
+        <input type="email" name="email" placeholder="Email" required>
+
+        <div class="password-box">
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <span class="toggle" onclick="togglePassword()">Show</span>
+        </div>
+
+        <button type="submit">Login</button>
+
+        <div class="forgot">
+    <a href="{% url 'password_reset' %}" style="color:#aaa; text-decoration:none;">Forgot password?</a>
+        </div>
+    </form>
+
+    {% for message in messages %}
+        <p style="color:red;">{{ message }}</p>
+    {% endfor %}
+</div>
+
+<script>
+function togglePassword() {
+    let input = document.getElementById("password");
+    input.type = input.type === "password" ? "text" : "password";
+}
+</script>
+
+</body>
+</html>
