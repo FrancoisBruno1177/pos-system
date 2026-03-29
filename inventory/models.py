@@ -1,88 +1,89 @@
 from django.db import models
 from django.conf import settings
-
-
+from django.utils import timezone
 
 User = settings.AUTH_USER_MODEL
 
 
-class Branch(models.Model):
+class TimeStampedModel(models.Model):
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
 
-    name = models.CharField(max_length=200)
+    class Meta:
+        abstract = True
 
-    address = models.TextField()
 
-    manager = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True
-    )
+class Category(TimeStampedModel):
+    name = models.CharField(max_length=120, unique=True)
+    description = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
 
-    def __str__(self):
-        return self.name
-
-      
-
-class Category(models.Model):
-
-    name=models.CharField(max_length=200)
+    class Meta:
+        ordering = ["name"]
+        verbose_name_plural = "Categories"
 
     def __str__(self):
         return self.name
 
 
-class Supplier(models.Model):
+class Supplier(TimeStampedModel):
+    name = models.CharField(max_length=150)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
 
-    name=models.CharField(max_length=200)
-    phone=models.CharField(max_length=50)
-    email=models.EmailField()
-    logo = models.ImageField(upload_to="suppliers/", null=True, blank=True)
+    class Meta:
+        ordering = ["name"]
+        unique_together = ["name", "email"]
 
     def __str__(self):
         return self.name
 
 
-class Product(models.Model):
-
-    name=models.CharField(max_length=200)
-
-    image = models.ImageField(upload_to="products/", null=True, blank=True)
-
-    category=models.ForeignKey(
+class Product(TimeStampedModel):
+    name = models.CharField(max_length=150)
+    sku = models.CharField(max_length=50, unique=True, default="TEMP-SKU")
+    category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True,
+        related_name="products"
     )
-
-    supplier=models.ForeignKey(
+    supplier = models.ForeignKey(
         Supplier,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True,
+        related_name="products"
+    )
+    cost_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    selling_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    quantity = models.PositiveIntegerField(default=0)
+    low_stock_threshold = models.PositiveIntegerField(default=5)
+    description = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to="products/", blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="products_created"
     )
 
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    cost_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
-    selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
-    quantity=models.IntegerField()
-
-    low_stock=models.IntegerField(default=5)
-
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, default=1)
-
-    created_at=models.DateTimeField(auto_now_add=True)
-
-    def is_low(self):
-
-        return self.quantity<=self.low_stock
+    class Meta:
+        ordering = ["name"]
+        indexes = [
+            models.Index(fields=["name"]),
+            models.Index(fields=["sku"]),
+            models.Index(fields=["quantity"]),
+        ]
 
     def __str__(self):
+        return f"{self.name} ({self.sku})"
 
-        return self.name      
-
-
-class Tax(models.Model):
-    name = models.CharField(max_length=50)
-    percentage = models.FloatField()
+    @property
+    def is_low_stock(self):
+        return self.quantity <= self.low_stock_threshold

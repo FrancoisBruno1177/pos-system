@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cashier Dashboard | POSIFY</title>
+    <style>
+        :root {
+            --bg: #071225;
+            --panel: rgba(255,255,255,.08);
+            --border: rgba(255,255,255,.10);
+            --text: #eef2ff;
+            --muted: #9aa8c7;
+            --primary: #2563eb;
+            --primary2: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger2: #dc2626;
+            --shadow: 0 18px 40px rgba(0,0,0,.28);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.18), transparent 30%),
+                linear-gradient(135deg, #071225 0%, #0f172a 48%, #13233f 100%);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 800;
+        }
+
+        .hero p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            text-decoration: none;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: .2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            box-shadow: 0 12px 24px rgba(37,99,235,.28);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,.08);
+            border: 1px solid var(--border);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), var(--danger2));
+            box-shadow: 0 12px 24px rgba(239,68,68,.22);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-head {
+            padding: 20px 22px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .panel-head h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .panel-body {
+            padding: 12px 18px 18px;
+        }
+
+        .sale-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 8px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+
+        .sale-row:last-child {
+            border-bottom: none;
+        }
+
+        .sale-row strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .sale-row span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .pill {
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            background: rgba(16,185,129,.14);
+            border: 1px solid rgba(16,185,129,.22);
+            color: #bbf7d0;
+        }
+
+        @media (max-width: 1000px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                padding: 18px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-actions {
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <section class="hero">
+            <div>
+                <h1>Cashier Dashboard</h1>
+                <p>Fast checkout, product visibility, and premium retail workflow.</p>
+            </div>
+
+            <div class="hero-actions">
+                <a href="{% url 'pos_view' %}" class="btn btn-primary">Start New Sale</a>
+                <a href="{% url 'sale_list' %}" class="btn btn-secondary">View Sales</a>
+                <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <div class="label">Today Revenue</div>
+                <div class="value">{{ today_revenue }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Transactions Today</div>
+                <div class="value">{{ total_transactions }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Available Products</div>
+                <div class="value">{{ available_products }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Low Stock</div>
+                <div class="value">{{ low_stock_count }}</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2>Recent Sales</h2>
+            </div>
+            <div class="panel-body">
+                {% for sale in recent_sales %}
+                    <div class="sale-row">
+                        <div>
+                            <strong>Sale #{{ sale.id }}</strong>
+                            <span>{{ sale.created_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                        <div class="pill">{{ sale.total_amount }}</div>
+                    </div>
+                {% empty %}
+                    <div class="sale-row">
+                        <div>
+                            <strong>No sales yet</strong>
+                            <span>Your recent transactions will appear here.</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</body>
+</html>

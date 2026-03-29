@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }}</title>
+    <style>
+        body { margin:0; font-family:Inter,Arial,sans-serif; background:linear-gradient(135deg,#0b1220,#111827,#1e293b); color:#e5e7eb; }
+        .page { max-width:980px; margin:0 auto; padding:28px; }
+        .card { background:rgba(255,255,255,0.08); border-radius:20px; padding:24px; }
+        h1 { margin-top:0; }
+        .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+        .info { background:rgba(255,255,255,0.05); padding:16px; border-radius:14px; }
+        .label { color:#94a3b8; font-size:13px; margin-bottom:6px; }
+        .value { font-size:18px; font-weight:700; }
+        .full { grid-column:1 / -1; }
+        .actions { margin-top:20px; display:flex; gap:12px; }
+        .btn { display:inline-block; padding:12px 16px; border-radius:12px; text-decoration:none; color:white; }
+        .btn-secondary { background:rgba(255,255,255,0.08); }
+        .btn-primary { background:#2563eb; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="card">
+            <h1>{{ product.name }}</h1>
+
+            <div class="grid">
+                <div class="info"><div class="label">SKU</div><div class="value">{{ product.sku }}</div></div>
+                <div class="info"><div class="label">Category</div><div class="value">{{ product.category|default:"—" }}</div></div>
+                <div class="info"><div class="label">Supplier</div><div class="value">{{ product.supplier|default:"—" }}</div></div>
+                <div class="info"><div class="label">Cost Price</div><div class="value">{{ product.cost_price }}</div></div>
+                <div class="info"><div class="label">Selling Price</div><div class="value">{{ product.selling_price }}</div></div>
+                <div class="info"><div class="label">Quantity</div><div class="value">{{ product.quantity }}</div></div>
+                <div class="info"><div class="label">Low Stock Threshold</div><div class="value">{{ product.low_stock_threshold }}</div></div>
+                <div class="info"><div class="label">Status</div><div class="value">{% if product.is_active %}Active{% else %}Inactive{% endif %}</div></div>
+                <div class="info full"><div class="label">Description</div><div class="value">{{ product.description|default:"No description" }}</div></div>
+            </div>
+
+            <div class="actions">
+                <a href="{% url 'product_list' %}" class="btn btn-secondary">Back</a>
+                <a href="{% url 'product_update' product.id %}" class="btn btn-primary">Edit Product</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

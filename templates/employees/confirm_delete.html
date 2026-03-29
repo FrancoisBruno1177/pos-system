@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Delete Employee | POS System</title>
+    <style>
+        :root {
+            --bg: #0b1220;
+            --panel: rgba(255,255,255,.08);
+            --border: rgba(255,255,255,.10);
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --danger: #ef4444;
+            --danger-2: #dc2626;
+            --shadow: 0 18px 40px rgba(0,0,0,.30);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(239,68,68,.18), transparent 28%),
+                linear-gradient(135deg, #0b1220 0%, #111827 45%, #1e293b 100%);
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 22px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 620px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            background: rgba(239,68,68,.14);
+            border: 1px solid rgba(239,68,68,.24);
+            font-size: 30px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+        p {
+            margin: 0 0 12px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .warning-box {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(239,68,68,.08);
+            border: 1px solid rgba(239,68,68,.20);
+            color: #fecaca;
+        }
+
+        .actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 26px;
+        }
+
+        .btn {
+            flex: 1;
+            height: 50px;
+            border-radius: 14px;
+            font-weight: 800;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: rgba(255,255,255,.08);
+            border: 1px solid var(--border);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, var(--danger), var(--danger-2));
+            box-shadow: 0 12px 24px rgba(239,68,68,.22);
+        }
+
+        @media (max-width: 560px) {
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">🗑</div>
+        <h1>Delete Employee</h1>
+        <p>
+            You are about to permanently delete this employee account.
+        </p>
+        <p>
+            <strong>{{ employee.user.email }}</strong> — {{ employee.employee_code }}
+        </p>
+
+        <div class="warning-box">
+            This action will remove both the employee profile and the linked user account.
+            This cannot be undone.
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="actions">
+                <a href="{% url 'employee_list' %}" class="btn btn-cancel">Cancel</a>
+                <button type="submit" class="btn btn-delete">Yes, Delete Employee</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

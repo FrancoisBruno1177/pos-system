@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <style>
+        body { margin:0; font-family:Inter,Arial,sans-serif; background:linear-gradient(135deg,#0b1220,#111827,#1e293b); color:#e5e7eb; }
+        .page { max-width:1280px; margin:0 auto; padding:28px; }
+        .topbar, .filters { display:flex; gap:12px; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+        .title h1 { margin:0; font-size:34px; }
+        .title p { color:#94a3b8; }
+        .btn { display:inline-block; padding:12px 16px; border-radius:12px; text-decoration:none; color:white; background:#2563eb; }
+        .panel { background:rgba(255,255,255,0.08); border-radius:18px; padding:20px; }
+        .filters form { display:flex; gap:12px; flex-wrap:wrap; width:100%; }
+        input, select {
+            background:rgba(15,23,42,.72);
+            color:white;
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:12px;
+            padding:12px 14px;
+        }
+        button {
+            border:none; border-radius:12px; padding:12px 16px; background:#2563eb; color:white; cursor:pointer;
+        }
+        table { width:100%; border-collapse:collapse; }
+        th, td { padding:14px; border-bottom:1px solid rgba(255,255,255,0.08); text-align:left; }
+        th { color:#94a3b8; }
+        .actions a {
+            color:#93c5fd;
+            text-decoration:none;
+            margin-right:10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="topbar">
+            <div class="title">
+                <h1>Products</h1>
+                <p>Track stock and manage inventory items.</p>
+            </div>
+            <a class="btn" href="{% url 'product_create' %}">+ Add Product</a>
+        </div>
+
+        <div class="panel filters">
+            <form method="get">
+                <input type="text" name="q" placeholder="Search product or SKU" value="{{ query }}">
+                <select name="category">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <select name="supplier">
+                    <option value="">All Suppliers</option>
+                    {% for supplier in suppliers %}
+                        <option value="{{ supplier.id }}" {% if selected_supplier == supplier.id|stringformat:"s" %}selected{% endif %}>
+                            {{ supplier.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <select name="stock">
+                    <option value="">All Stock</option>
+                    <option value="low" {% if stock_filter == "low" %}selected{% endif %}>Low Stock</option>
+                    <option value="in" {% if stock_filter == "in" %}selected{% endif %}>In Stock</option>
+                    <option value="out" {% if stock_filter == "out" %}selected{% endif %}>Out of Stock</option>
+                </select>
+                <button type="submit">Filter</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>SKU</th>
+                        <th>Category</th>
+                        <th>Supplier</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.sku }}</td>
+                            <td>{{ product.category|default:"—" }}</td>
+                            <td>{{ product.supplier|default:"—" }}</td>
+                            <td>{{ product.selling_price }}</td>
+                            <td>{{ product.quantity }}</td>
+                            <td>
+                                {% if product.is_low_stock %}Low Stock{% else %}Normal{% endif %}
+                            </td>
+                            <td class="actions">
+                                <a href="{% url 'product_detail' product.id %}">View</a>
+                                <a href="{% url 'product_update' product.id %}">Edit</a>
+                                <a href="{% url 'product_delete' product.id %}">Delete</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="8">No products found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

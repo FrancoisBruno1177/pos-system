@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Suppliers | POSIFY</title>
+    <style>
+        :root {
+            --bg: #0b1220;
+            --panel: rgba(255,255,255,.08);
+            --border: rgba(255,255,255,.10);
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --primary: #2563eb;
+            --primary-2: #1d4ed8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --shadow: 0 18px 40px rgba(0,0,0,.30);
+            --radius: 22px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.18), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(16,185,129,.10), transparent 25%),
+                linear-gradient(135deg, #0b1220 0%, #111827 45%, #1e293b 100%);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .title-wrap h1 {
+            margin: 0;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+        .title-wrap p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 46px;
+            padding: 0 18px;
+            border-radius: 14px;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            color: #fff;
+            font-weight: 700;
+            transition: .2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            border: none;
+            box-shadow: 0 12px 24px rgba(37,99,235,.28);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,.06);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card .label {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .card-head {
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-head h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 16px 20px;
+            color: #cbd5e1;
+            font-size: 13px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            background: rgba(255,255,255,.04);
+        }
+
+        tbody td {
+            padding: 18px 20px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: rgba(255,255,255,.04);
+        }
+
+        .supplier-cell strong {
+            display: block;
+            font-size: 15px;
+        }
+
+        .supplier-cell span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-active {
+            background: rgba(16,185,129,.14);
+            color: #bbf7d0;
+            border: 1px solid rgba(16,185,129,.24);
+        }
+
+        .badge-inactive {
+            background: rgba(239,68,68,.14);
+            color: #fecaca;
+            border: 1px solid rgba(239,68,68,.24);
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-link {
+            text-decoration: none;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border);
+        }
+
+        .empty {
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .page { padding: 18px; }
+            .topbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .actions {
+                width: 100%;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="topbar">
+            <div class="title-wrap">
+                <h1>Suppliers</h1>
+                <p>Manage your vendor network and supplier contacts in one place.</p>
+            </div>
+
+            <div class="actions">
+                <a href="{% url 'inventory_dashboard' %}" class="btn btn-secondary">Back to Inventory</a>
+                <a href="{% url 'supplier_create' %}" class="btn btn-primary">+ New Supplier</a>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="label">Total Suppliers</div>
+                <div class="value">{{ suppliers|length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Supplier Network</div>
+                <div class="value">Stable</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Stock Pipeline</div>
+                <div class="value">Ready</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-head">
+                <h2>Supplier Directory</h2>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Supplier</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for supplier in suppliers %}
+                            <tr>
+                                <td>
+                                    <div class="supplier-cell">
+                                        <strong>{{ supplier.name }}</strong>
+                                    </div>
+                                </td>
+                                <td>{{ supplier.email|default:"—" }}</td>
+                                <td>{{ supplier.phone|default:"—" }}</td>
+                                <td>
+                                    <div class="supplier-cell">
+                                        <span>{{ supplier.address|default:"No address provided." }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if supplier.is_active %}
+                                        <span class="badge badge-active">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-inactive">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ supplier.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="actions-row">
+                                        <a href="{% url 'supplier_update' supplier.id %}" class="action-link">Edit</a>
+                                        <a href="{% url 'supplier_delete' supplier.id %}" class="action-link">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty">
+                                        No suppliers found. Add your first supplier to start managing your product sources.
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

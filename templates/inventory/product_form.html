@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <style>
+        body { margin:0; font-family:Inter,Arial,sans-serif; background:linear-gradient(135deg,#0b1220,#111827,#1e293b); color:#e5e7eb; }
+        .page { max-width:980px; margin:0 auto; padding:28px; }
+        .card { background:rgba(255,255,255,0.08); border-radius:20px; padding:24px; }
+        h1 { margin-top:0; }
+        .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+        .full { grid-column:1 / -1; }
+        label { display:block; margin-bottom:8px; font-weight:600; }
+        input, select, textarea {
+            width:100%;
+            background:rgba(15,23,42,.72);
+            color:white;
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:12px;
+            padding:12px 14px;
+        }
+        .errorlist { color:#fca5a5; list-style:none; padding:0; margin:8px 0 0; }
+        .actions { margin-top:20px; display:flex; gap:12px; }
+        .btn, button {
+            display:inline-block;
+            padding:12px 16px;
+            border-radius:12px;
+            text-decoration:none;
+            border:none;
+            cursor:pointer;
+            color:white;
+        }
+        .btn-secondary { background:rgba(255,255,255,0.08); }
+        .btn-primary { background:#2563eb; }
+        @media (max-width: 700px) {
+            .grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="card">
+            <h1>{{ page_title }}</h1>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="grid">
+                    {% for field in form %}
+                        <div class="{% if field.name == 'description' or field.name == 'image' or field.name == 'is_active' %}full{% endif %}">
+                            {% if field.name == "is_active" %}
+                                {{ field }} <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% else %}
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                            {% endif %}
+                            {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="actions">
+                    <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

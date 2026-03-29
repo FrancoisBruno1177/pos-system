@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ page_title }} | POSIFY</title>
+    <style>
+        :root {
+            --bg: #0b1220;
+            --panel: rgba(255,255,255,.08);
+            --border: rgba(255,255,255,.10);
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --primary: #2563eb;
+            --primary-2: #1d4ed8;
+            --shadow: 0 18px 40px rgba(0,0,0,.30);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.18), transparent 28%),
+                linear-gradient(135deg, #0b1220 0%, #111827 45%, #1e293b 100%);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+        .hero p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border);
+            font-weight: 700;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px;
+            backdrop-filter: blur(16px);
+            box-shadow: var(--shadow);
+        }
+
+        form {
+            display: grid;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #dbeafe;
+        }
+
+        input, textarea {
+            width: 100%;
+            border: 1px solid rgba(148,163,184,.25);
+            background: rgba(15,23,42,.72);
+            color: #f8fafc;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 15px;
+            outline: none;
+            transition: .2s ease;
+        }
+
+        input:focus, textarea:focus {
+            border-color: rgba(59,130,246,.8);
+            box-shadow: 0 0 0 4px rgba(59,130,246,.15);
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .errorlist {
+            margin: 8px 0 0;
+            padding: 0;
+            list-style: none;
+            color: #fecaca;
+            font-size: 13px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-top: 8px;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 14px;
+            justify-content: flex-end;
+            padding-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            height: 50px;
+            padding: 0 20px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 12px 24px rgba(37,99,235,.28);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,.08);
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 720px) {
+            .page { padding: 18px; }
+            .hero {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .actions {
+                flex-direction: column;
+            }
+            .btn, .btn-back {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="hero">
+            <div>
+                <h1>{{ page_title }}</h1>
+                <p>Create or update a category to keep your product catalog organized.</p>
+            </div>
+            <a href="{% url 'category_list' %}" class="btn-back">Back to Categories</a>
+        </div>
+
+        <div class="card">
+            <form method="post">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div>
+                        {% if field.name == "is_active" %}
+                            <div class="checkbox-row">
+                                {{ field }}
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            </div>
+                        {% else %}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="errorlist">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="actions">
+                    <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

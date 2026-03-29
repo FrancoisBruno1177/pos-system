@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Employee Detail | POS System</title>
+    <style>
+        :root {
+            --bg: #0b1220;
+            --panel: rgba(255,255,255,.08);
+            --border: rgba(255,255,255,.10);
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --shadow: 0 18px 40px rgba(0,0,0,.30);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.18), transparent 28%),
+                linear-gradient(135deg, #0b1220 0%, #111827 45%, #1e293b 100%);
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            gap: 16px;
+        }
+
+        .top h1 {
+            margin: 0;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+        .muted { color: var(--muted); }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            text-decoration: none;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 800;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.06);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .profile-head {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .avatar {
+            width: 74px;
+            height: 74px;
+            border-radius: 22px;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            font-size: 28px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        .profile-head h2 {
+            margin: 0 0 6px;
+            font-size: 24px;
+        }
+
+        .badge {
+            display: inline-flex;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-right: 8px;
+        }
+
+        .badge-role {
+            background: rgba(37,99,235,.14);
+            color: #bfdbfe;
+            border: 1px solid rgba(37,99,235,.24);
+        }
+
+        .badge-active {
+            background: rgba(16,185,129,.14);
+            color: #bbf7d0;
+            border: 1px solid rgba(16,185,129,.24);
+        }
+
+        .badge-inactive {
+            background: rgba(239,68,68,.14);
+            color: #fecaca;
+            border: 1px solid rgba(239,68,68,.24);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .info-card {
+            border: 1px solid rgba(255,255,255,.08);
+            background: rgba(255,255,255,.04);
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .value {
+            font-size: 17px;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 760px) {
+            .page { padding: 18px; }
+            .top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .actions {
+                flex-direction: column;
+            }
+            .btn {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="top">
+            <div>
+                <h1>Employee Detail</h1>
+                <p class="muted">View employee profile and account information.</p>
+            </div>
+
+            <div class="actions">
+                <a href="{% url 'employee_list' %}" class="btn">Back</a>
+                <a href="{% url 'employee_update' employee.id %}" class="btn btn-primary">Edit Employee</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="profile-head">
+                <div class="avatar">{{ employee.user.email|slice:":1"|upper }}</div>
+                <div>
+                    <h2>{{ employee.user.email }}</h2>
+                    <span class="badge badge-role">{{ employee.user.role }}</span>
+                    {% if employee.is_active %}
+                        <span class="badge badge-active">Active</span>
+                    {% else %}
+                        <span class="badge badge-inactive">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="info-card">
+                    <div class="label">Employee Code</div>
+                    <div class="value">{{ employee.employee_code }}</div>
+                </div>
+
+                <div class="info-card">
+                    <div class="label">Phone</div>
+                    <div class="value">{{ employee.phone|default:"—" }}</div>
+                </div>
+
+                <div class="info-card">
+                    <div class="label">Salary</div>
+                    <div class="value">{{ employee.salary }}</div>
+                </div>
+
+                <div class="info-card">
+                    <div class="label">Hire Date</div>
+                    <div class="value">{{ employee.hire_date|default:"—" }}</div>
+                </div>
+
+                <div class="info-card full">
+                    <div class="label">Address</div>
+                    <div class="value">{{ employee.address|default:"No address provided" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard | POSIFY</title>
+    <style>
+        :root {
+            --bg: #0b1220;
+            --panel: rgba(255,255,255,.08);
+            --panel-2: rgba(255,255,255,.05);
+            --border: rgba(255,255,255,.10);
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --primary: #2563eb;
+            --primary-2: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 18px 40px rgba(0,0,0,.30);
+            --radius: 22px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.18), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(16,185,129,.10), transparent 25%),
+                linear-gradient(135deg, #0b1220 0%, #111827 45%, #1e293b 100%);
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(255,255,255,.04);
+            border-right: 1px solid rgba(255,255,255,.08);
+            padding: 24px 18px;
+            backdrop-filter: blur(16px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .brand-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 12px 24px rgba(37,99,235,.28);
+        }
+
+        .brand-text h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .brand-text p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .nav {
+            display: grid;
+            gap: 10px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--text);
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-weight: 700;
+            transition: .2s ease;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,.10);
+            transform: translateX(2px);
+        }
+
+        .content {
+            padding: 28px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .topbar h1 {
+            margin: 0;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+        .topbar p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
+
+        .logout-btn {
+            text-decoration: none;
+            color: white;
+            background: rgba(239,68,68,.14);
+            border: 1px solid rgba(239,68,68,.24);
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 800;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            backdrop-filter: blur(16px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card .label {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .action-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px;
+            text-decoration: none;
+            color: white;
+            box-shadow: var(--shadow);
+            transition: .2s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,.10);
+        }
+
+        .action-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+
+        .action-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-head {
+            padding: 20px 22px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .panel-head h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .panel-link {
+            text-decoration: none;
+            color: #bfdbfe;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .panel-body {
+            padding: 12px 18px 18px;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 10px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .list-item span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-low {
+            background: rgba(245,158,11,.14);
+            color: #fde68a;
+            border: 1px solid rgba(245,158,11,.24);
+        }
+
+        .badge-normal {
+            background: rgba(16,185,129,.14);
+            color: #bbf7d0;
+            border: 1px solid rgba(16,185,129,.24);
+        }
+
+        @media (max-width: 1280px) {
+            .quick-actions {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .content, .sidebar {
+                padding: 18px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">P</div>
+                <div class="brand-text">
+                    <h2>POSIFY</h2>
+                    <p>Admin Panel</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+                <a href="{% url 'employee_list' %}">Employees</a>
+                <a href="{% url 'inventory_dashboard' %}">Inventory Overview</a>
+                <a href="{% url 'product_list' %}">Products</a>
+                <a href="{% url 'category_list' %}">Categories</a>
+                <a href="{% url 'supplier_list' %}">Suppliers</a>
+                <a href="{% url 'sale_list' %}">View Sales</a>
+                <a href="{% url 'employee_create' %}">Add Employee</a>
+                <a href="{% url 'product_create' %}">Add Product</a>
+                <a href="{% url 'pos_view' %}">New Sale</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <div class="topbar">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>Welcome to your business control center.</p>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            </div>
+
+            <section class="stats">
+                <div class="stat-card">
+                    <div class="label">Employees</div>
+                    <div class="value">{{ total_employees }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Products</div>
+                    <div class="value">{{ total_products }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Sales</div>
+                    <div class="value">{{ total_sales }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Categories</div>
+                    <div class="value">{{ total_categories }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Suppliers</div>
+                    <div class="value">{{ total_suppliers }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Low Stock</div>
+                    <div class="value">{{ low_stock_count }}</div>
+                </div>
+            </section>
+
+            <section class="quick-actions">
+                <a href="{% url 'employee_list' %}" class="action-card">
+                    <h3>Manage Employees</h3>
+                    <p>Create and manage admins, managers, and cashiers.</p>
+                </a>
+
+                <a href="{% url 'product_list' %}" class="action-card">
+                    <h3>Manage Products</h3>
+                    <p>View stock, edit prices, and control inventory records.</p>
+                </a>
+
+                <a href="{% url 'category_list' %}" class="action-card">
+                    <h3>Manage Categories</h3>
+                    <p>Keep your product catalog clean and organized.</p>
+                </a>
+
+                <a href="{% url 'supplier_list' %}" class="action-card">
+                    <h3>Manage Suppliers</h3>
+                    <p>Track vendors and sourcing information in one place.</p>
+                </a>
+
+                <a href="{% url 'sale_list' %}" class="action-card">
+                    <h3>View Sales</h3>
+                    <p>Review all sales, inspect sale details, and reprint receipts.</p>
+                </a>
+            </section>
+
+            <section class="panels">
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Recent Products</h2>
+                        <a href="{% url 'product_list' %}" class="panel-link">View all</a>
+                    </div>
+                    <div class="panel-body">
+                        {% for product in recent_products %}
+                            <div class="list-item">
+                                <div>
+                                    <strong>{{ product.name }}</strong>
+                                    <span>{{ product.sku }} • Qty: {{ product.quantity }}</span>
+                                </div>
+                                {% if product.is_low_stock %}
+                                    <span class="badge badge-low">Low Stock</span>
+                                {% else %}
+                                    <span class="badge badge-normal">In Stock</span>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <div class="list-item">
+                                <div>
+                                    <strong>No products yet</strong>
+                                    <span>Create your first product to start tracking inventory.</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Recent Sales</h2>
+                        <a href="{% url 'sale_list' %}" class="panel-link">View all</a>
+                    </div>
+                    <div class="panel-body">
+                        {% for sale in recent_sales %}
+                            <div class="list-item">
+                                <div>
+                                    <strong>Sale #{{ sale.id }}</strong>
+                                    <span>{{ sale.created_at|date:"M d, Y H:i" }}</span>
+                                </div>
+                                <span class="badge badge-normal">{{ sale.total_amount }}</span>
+                            </div>
+                        {% empty %}
+                            <div class="list-item">
+                                <div>
+                                    <strong>No sales yet</strong>
+                                    <span>Sales activity will appear here once checkout starts.</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,18 +1,214 @@
-<body onload="window.print()">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt #{{ sale.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 30px 0;
+            color: #111827;
+        }
 
-<h2>POSIFY RECEIPT</h2>
+        .receipt {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+        }
 
-<p>Sale #{{ sale.id }}</p>
-<p>Date: {{ sale.created_at }}</p>
+        .center {
+            text-align: center;
+        }
 
-<hr>
+        h1, h2, p {
+            margin: 0;
+        }
 
-{% for item in sale.items.all %}
-<p>{{ item.product.name }} x{{ item.quantity }}</p>
-{% endfor %}
+        .brand {
+            margin-bottom: 16px;
+        }
 
-<hr>
+        .brand h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
 
-<h3>Total: ${{ sale.total }}</h3>
+        .muted {
+            color: #6b7280;
+            font-size: 13px;
+        }
 
+        .line {
+            border-top: 1px dashed #9ca3af;
+            margin: 16px 0;
+        }
+
+        .meta {
+            display: grid;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 8px 0;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th:last-child, td:last-child {
+            text-align: right;
+        }
+
+        .totals {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .grand-total {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .print-actions {
+            text-align: center;
+            margin-top: 18px;
+        }
+
+        .print-btn, .back-btn {
+            display: inline-block;
+            margin: 6px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .print-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .back-btn {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .receipt {
+                border: none;
+                max-width: 100%;
+            }
+
+            .print-actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt">
+        <div class="center brand">
+            <h1>POSIFY</h1>
+            <p class="muted">Premium Retail Receipt</p>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="meta">
+            <div><strong>Receipt:</strong> #{{ sale.id }}</div>
+            <div><strong>Date:</strong> {{ sale.created_at|date:"M d, Y H:i" }}</div>
+            <div><strong>Cashier:</strong> {{ sale.cashier.email|default:"—" }}</div>
+            <div><strong>Customer:</strong> {{ sale.customer_name|default:"Walk-in" }}</div>
+            <div><strong>Payment:</strong> {{ sale.payment_method }}</div>
+        </div>
+
+        <div class="line"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sale.items.all %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.product_name }}</strong><br>
+                            <span class="muted">{{ item.quantity }} × {{ item.unit_price }}</span>
+                        </td>
+                        <td>{{ item.line_total }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2">No items found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="line"></div>
+
+        <div class="totals">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span>{{ sale.subtotal }}</span>
+            </div>
+            <div class="total-row">
+                <span>Tax</span>
+                <span>{{ sale.tax_amount }}</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>Total</span>
+                <span>{{ sale.total_amount }}</span>
+            </div>
+            <div class="total-row">
+                <span>Amount Paid</span>
+                <span>{{ sale.amount_paid }}</span>
+            </div>
+            <div class="total-row">
+                <span>Change</span>
+                <span>{{ sale.change_amount }}</span>
+            </div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="center muted">
+            Thank you for shopping with us.
+        </div>
+
+        <div class="print-actions">
+            <button class="print-btn" onclick="window.print()">Print Receipt</button>
+            <a href="{{ back_url }}" class="back-btn">{{ back_label }}</a>
+        </div>
+    </div>
 </body>
+</html>

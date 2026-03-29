@@ -1,31 +1,590 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>POS | POSIFY</title>
+    <style>
+        :root {
+            --bg: #071225;
+            --panel: rgba(255,255,255,.08);
+            --panel2: rgba(255,255,255,.05);
+            --border: rgba(255,255,255,.10);
+            --text: #eef2ff;
+            --muted: #9aa8c7;
+            --primary: #2563eb;
+            --primary2: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 18px 40px rgba(0,0,0,.28);
+        }
 
-{% block content %}
+        * { box-sizing: border-box; }
 
-<h2>POS Terminal</h2>
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,.16), transparent 30%),
+                linear-gradient(135deg, #071225 0%, #0f172a 48%, #13233f 100%);
+            min-height: 100vh;
+        }
 
-<div class="products">
+        .page {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 22px;
+        }
 
-{% for p in products %}
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
 
-<button onclick="addToCart('{{p.id}}','{{p.name}}',{{p.price}})">
+        .topbar h1 {
+            margin: 0;
+            font-size: 34px;
+            font-weight: 800;
+        }
 
-{{p.name}} - ${{p.price}}
+        .topbar p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
 
-</button>
+        .top-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-{% endfor %}
+        .btn {
+            text-decoration: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+        }
 
-</div>
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+        }
 
-<h3>Cart</h3>
+        .btn-secondary {
+            background: rgba(255,255,255,.08);
+            border: 1px solid var(--border);
+        }
 
-<ul id="cart"></ul>
+        .layout {
+            display: grid;
+            grid-template-columns: 1.6fr .9fr;
+            gap: 20px;
+        }
 
-<h3>Total: $<span id="total">0</span></h3>
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
 
-<button onclick="checkout()">Checkout</button>
+        .panel-head {
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
 
-<script src="/static/js/pos.js"></script>
+        .panel-head h2 {
+            margin: 0;
+            font-size: 20px;
+        }
 
-{% endblock %}
+        .panel-body {
+            padding: 18px;
+        }
+
+        .filters form {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            background: rgba(15,23,42,.76);
+            color: white;
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 14px;
+            min-height: 46px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .product-card {
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: .2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,.08);
+        }
+
+        .product-image {
+            height: 180px;
+            background: rgba(255,255,255,.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-placeholder {
+            font-size: 42px;
+            opacity: .75;
+        }
+
+        .product-info {
+            padding: 16px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .product-info h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .stock {
+            font-size: 12px;
+            font-weight: 800;
+            color: #bbf7d0;
+            background: rgba(16,185,129,.12);
+            border: 1px solid rgba(16,185,129,.18);
+            padding: 6px 10px;
+            border-radius: 999px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .qty-input {
+            width: 90px;
+            min-height: 42px;
+        }
+
+        .add-btn {
+            flex: 1;
+            background: linear-gradient(135deg, var(--success), #0f9f73);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .cart-list {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .cart-item strong {
+            display: block;
+        }
+
+        .cart-item span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: rgba(255,255,255,.08);
+            color: white;
+            font-weight: 800;
+        }
+
+        .remove-btn {
+            background: rgba(239,68,68,.14);
+            border: 1px solid rgba(239,68,68,.18);
+            color: #fecaca;
+            border-radius: 10px;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        .totals {
+            display: grid;
+            gap: 10px;
+            padding: 16px 0;
+            border-top: 1px solid rgba(255,255,255,.08);
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            margin-bottom: 16px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .checkout-form {
+            display: grid;
+            gap: 12px;
+        }
+
+        .checkout-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #dbeafe;
+            font-weight: 700;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            min-height: 50px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            color: white;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .empty-cart {
+            color: var(--muted);
+            text-align: center;
+            padding: 24px 10px;
+        }
+
+        @media (max-width: 1200px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 720px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page {
+                padding: 16px;
+            }
+
+            .cart-item {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <section class="topbar">
+            <div>
+                <h1>New Sale</h1>
+                <p>Browse products visually and complete checkout like a premium supermarket POS.</p>
+            </div>
+
+            <div class="top-actions">
+                <a href="{% url 'sales_cashier_dashboard' %}" class="btn btn-secondary">Back to Cashier</a>
+                <a href="{% url 'sale_list' %}" class="btn btn-secondary">Sales History</a>
+            </div>
+        </section>
+
+        <div class="layout">
+            <section class="panel">
+                <div class="panel-head">
+                    <h2>Products</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="filters" style="margin-bottom: 18px;">
+                        <form method="get">
+                            <input type="text" name="q" placeholder="Search products or SKU" value="{{ query }}">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
+                    </div>
+
+                    <div class="product-grid">
+                        {% for product in products %}
+                            <div class="product-card">
+                                <div class="product-image">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                    {% else %}
+                                        <div class="product-placeholder">🛒</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="product-info">
+                                    <h3>{{ product.name }}</h3>
+                                    <div class="meta">{{ product.sku }}{% if product.category %} • {{ product.category.name }}{% endif %}</div>
+
+                                    <div class="price-row">
+                                        <div class="price">{{ product.selling_price }}</div>
+                                        <div class="stock">Stock {{ product.quantity }}</div>
+                                    </div>
+
+                                    <div class="card-actions">
+                                        <input type="number" min="1" max="{{ product.quantity }}" value="1" class="qty-input" id="qty-{{ product.id }}">
+                                        <button
+                                            type="button"
+                                            class="add-btn"
+                                            onclick="addToCart('{{ product.id }}', '{{ product.name|escapejs }}', '{{ product.selling_price }}', '{{ product.quantity }}')"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>No products available for sale.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h2>Cart & Checkout</h2>
+                </div>
+                <div class="panel-body">
+                    <form method="post" action="{% url 'create_sale' %}" id="checkoutForm">
+                        {% csrf_token %}
+                        <div id="cartList" class="cart-list"></div>
+
+                        <div id="emptyCart" class="empty-cart">
+                            Your cart is empty.
+                        </div>
+
+                        <div class="totals">
+                            <div class="total-row">
+                                <strong>Subtotal</strong>
+                                <strong id="subtotalValue">0.00</strong>
+                            </div>
+                            <div class="total-row">
+                                <span>Tax</span>
+                                <span id="taxValue">0.00</span>
+                            </div>
+                            <div class="total-row">
+                                <strong>Total</strong>
+                                <strong id="totalValue">0.00</strong>
+                            </div>
+                        </div>
+
+                        <div class="checkout-form">
+                            {% for field in checkout_form %}
+                                <div>
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <input type="hidden" name="cart_data" id="cartDataInput">
+
+                        <button type="submit" class="checkout-btn">Complete Sale & Generate Receipt</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const cart = [];
+
+        function formatMoney(value) {
+            const number = parseFloat(value || 0);
+            return number.toFixed(2);
+        }
+
+        function addToCart(productId, productName, unitPrice, maxStock) {
+            const qtyField = document.getElementById(`qty-${productId}`);
+            const quantity = parseInt(qtyField.value || "1", 10);
+            const stock = parseInt(maxStock, 10);
+
+            if (quantity <= 0) {
+                alert("Quantity must be greater than zero.");
+                return;
+            }
+
+            const existing = cart.find(item => item.product_id == productId);
+
+            if (existing) {
+                if ((existing.quantity + quantity) > stock) {
+                    alert("Not enough stock for this product.");
+                    return;
+                }
+                existing.quantity += quantity;
+            } else {
+                if (quantity > stock) {
+                    alert("Not enough stock for this product.");
+                    return;
+                }
+                cart.push({
+                    product_id: parseInt(productId, 10),
+                    name: productName,
+                    unit_price: parseFloat(unitPrice),
+                    quantity: quantity
+                });
+            }
+
+            renderCart();
+        }
+
+        function increaseQty(productId) {
+            const item = cart.find(i => i.product_id === productId);
+            if (!item) return;
+            item.quantity += 1;
+            renderCart();
+        }
+
+        function decreaseQty(productId) {
+            const item = cart.find(i => i.product_id === productId);
+            if (!item) return;
+
+            item.quantity -= 1;
+            if (item.quantity <= 0) {
+                removeItem(productId);
+                return;
+            }
+            renderCart();
+        }
+
+        function removeItem(productId) {
+            const index = cart.findIndex(i => i.product_id === productId);
+            if (index >= 0) {
+                cart.splice(index, 1);
+            }
+            renderCart();
+        }
+
+        function renderCart() {
+            const cartList = document.getElementById("cartList");
+            const emptyCart = document.getElementById("emptyCart");
+            const cartDataInput = document.getElementById("cartDataInput");
+
+            cartList.innerHTML = "";
+
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                emptyCart.style.display = "block";
+            } else {
+                emptyCart.style.display = "none";
+            }
+
+            cart.forEach(item => {
+                const lineTotal = item.quantity * item.unit_price;
+                subtotal += lineTotal;
+
+                const row = document.createElement("div");
+                row.className = "cart-item";
+                row.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong>
+                        <span>${formatMoney(item.unit_price)} each</span>
+                    </div>
+                    <div class="qty-control">
+                        <button type="button" class="qty-btn" onclick="decreaseQty(${item.product_id})">-</button>
+                        <strong>${item.quantity}</strong>
+                        <button type="button" class="qty-btn" onclick="increaseQty(${item.product_id})">+</button>
+                    </div>
+                    <div><strong>${formatMoney(lineTotal)}</strong></div>
+                    <div><button type="button" class="remove-btn" onclick="removeItem(${item.product_id})">Remove</button></div>
+                `;
+                cartList.appendChild(row);
+            });
+
+            const tax = 0;
+            const total = subtotal + tax;
+
+            document.getElementById("subtotalValue").innerText = formatMoney(subtotal);
+            document.getElementById("taxValue").innerText = formatMoney(tax);
+            document.getElementById("totalValue").innerText = formatMoney(total);
+            cartDataInput.value = JSON.stringify(cart);
+        }
+
+        document.getElementById("checkoutForm").addEventListener("submit", function(e) {
+            if (cart.length === 0) {
+                e.preventDefault();
+                alert("Your cart is empty.");
+            }
+        });
+    </script>
+</body>
+</html>

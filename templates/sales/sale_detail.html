@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Detail | POSIFY</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: #eef2ff;
+            background: linear-gradient(135deg, #071225, #0f172a, #13233f);
+        }
+
+        .page {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        .card {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .head {
+            padding: 20px 22px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .body {
+            padding: 20px 22px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .info {
+            background: rgba(255,255,255,.05);
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .label {
+            color: #9aa8c7;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            text-align: left;
+        }
+
+        th {
+            color: #9aa8c7;
+        }
+
+        .actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            text-decoration: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.10);
+            font-weight: 800;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            border: none;
+        }
+
+        @media (max-width: 720px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="card">
+            <div class="head">
+                <h1>Sale #{{ sale.id }}</h1>
+            </div>
+
+            <div class="body">
+                <div class="grid">
+                    <div class="info">
+                        <div class="label">Cashier</div>
+                        <div class="value">{{ sale.cashier.email|default:"—" }}</div>
+                    </div>
+                    <div class="info">
+                        <div class="label">Customer</div>
+                        <div class="value">{{ sale.customer_name|default:"Walk-in" }}</div>
+                    </div>
+                    <div class="info">
+                        <div class="label">Payment Method</div>
+                        <div class="value">{{ sale.payment_method }}</div>
+                    </div>
+                    <div class="info">
+                        <div class="label">Date</div>
+                        <div class="value">{{ sale.created_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in sale.items.all %}
+                            <tr>
+                                <td>{{ item.product_name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.unit_price }}</td>
+                                <td>{{ item.line_total }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4">No items found for this sale.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="grid" style="margin-top:18px;">
+                    <div class="info">
+                        <div class="label">Subtotal</div>
+                        <div class="value">{{ sale.subtotal }}</div>
+                    </div>
+                    <div class="info">
+                        <div class="label">Tax</div>
+                        <div class="value">{{ sale.tax_amount }}</div>
+                    </div>
+                    <div class="info">
+                        <div class="label">Amount Paid</div>
+                        <div class="value">{{ sale.amount_paid }}</div>
+                    </div>
+                    <div class="info">
+                        <div class="label">Change</div>
+                        <div class="value">{{ sale.change_amount }}</div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a href="{{ back_url }}" class="btn">{{ back_label }}</a>
+                    <a href="{% url 'sale_receipt' sale.id %}" class="btn btn-primary">Print Receipt</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
