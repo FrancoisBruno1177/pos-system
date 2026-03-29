@@ -9,6 +9,7 @@ urlpatterns = [
     path("products/<int:pk>/", views.product_detail, name="product_detail"),
     path("products/<int:pk>/edit/", views.product_update, name="product_update"),
     path("products/<int:pk>/delete/", views.product_delete, name="product_delete"),
+    path("products/<int:pk>/adjust-stock/", views.stock_adjustment_create, name="stock_adjustment_create"),
 
     path("categories/", views.category_list, name="category_list"),
     path("categories/create/", views.category_create, name="category_create"),
@@ -19,4 +20,6 @@ urlpatterns = [
     path("suppliers/create/", views.supplier_create, name="supplier_create"),
     path("suppliers/<int:pk>/edit/", views.supplier_update, name="supplier_update"),
     path("suppliers/<int:pk>/delete/", views.supplier_delete, name="supplier_delete"),
+
+    path("stock-history/", views.stock_movement_list, name="stock_movement_list"),
 ]

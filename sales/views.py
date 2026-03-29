@@ -1,6 +1,5 @@
 import json
 from decimal import Decimal
-from django.urls import reverse
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -10,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from inventory.models import Product
+from inventory.models import Product, StockMovement
 from .forms import SaleCheckoutForm
 from .models import Sale, SaleItem
 
@@ -56,8 +55,8 @@ def cashier_dashboard(request):
         return redirect("dashboard")
 
     today = timezone.localdate()
-
     today_sales = Sale.objects.filter(created_at__date=today)
+
     today_revenue = today_sales.aggregate(total=Sum("total_amount"))["total"] or Decimal("0.00")
     total_transactions = today_sales.count()
     available_products = Product.objects.filter(is_active=True, quantity__gt=0).count()
@@ -94,13 +93,11 @@ def pos_view(request):
     if category_id:
         products = products.filter(category_id=category_id)
 
-    checkout_form = SaleCheckoutForm()
-
     context = {
         "products": products.order_by("name"),
         "query": query,
         "category_id": category_id,
-        "checkout_form": checkout_form,
+        "checkout_form": SaleCheckoutForm(),
         **get_sales_back_context(request.user),
     }
     return render(request, "sales/pos.html", context)
@@ -150,7 +147,12 @@ def create_sale(request):
             messages.error(request, "Quantity must be greater than zero.")
             return redirect("pos_view")
 
-        product = Product.objects.select_for_update().filter(pk=product_id, is_active=True).first()
+        product = (
+            Product.objects
+            .select_for_update()
+            .filter(pk=product_id, is_active=True)
+            .first()
+        )
 
         if not product:
             messages.error(request, "A product in your cart no longer exists.")
@@ -194,6 +196,8 @@ def create_sale(request):
 
     for item in validated_items:
         product = item["product"]
+        previous_quantity = product.quantity
+        new_quantity = previous_quantity - item["quantity"]
 
         SaleItem.objects.create(
             sale=sale,
@@ -204,8 +208,19 @@ def create_sale(request):
             line_total=item["line_total"],
         )
 
-        product.quantity -= item["quantity"]
+        product.quantity = new_quantity
         product.save(update_fields=["quantity"])
+
+        StockMovement.objects.create(
+            product=product,
+            movement_type="SALE",
+            quantity=item["quantity"],
+            previous_quantity=previous_quantity,
+            new_quantity=new_quantity,
+            reference=f"SALE #{sale.id}",
+            note="Stock deducted from completed sale.",
+            created_by=request.user,
+        )
 
     messages.success(request, "Sale completed successfully.")
     return redirect("sale_receipt", pk=sale.pk)
@@ -221,18 +236,18 @@ def sale_list(request):
     sales = Sale.objects.select_related("cashier").prefetch_related("items").all()
 
     if query:
-        base_qs = sales.filter(
+        filtered_sales = sales.filter(
             Q(customer_name__icontains=query) |
             Q(cashier__email__icontains=query)
         )
-        if query.isdigit():
-            base_qs = base_qs | sales.filter(id=int(query))
-        sales = base_qs
 
-    sales = sales.order_by("-created_at").distinct()
+        if query.isdigit():
+            filtered_sales = filtered_sales | sales.filter(id=int(query))
+
+        sales = filtered_sales
 
     context = {
-        "sales": sales,
+        "sales": sales.order_by("-created_at").distinct(),
         "query": query,
         **get_sales_back_context(request.user),
     }
@@ -273,25 +288,3 @@ def sale_receipt(request, pk):
         **get_sales_back_context(request.user),
     }
     return render(request, "sales/receipt.html", context)
-
-
-def get_sales_back_context(user):
-    if user.is_superuser or user.role == "SUPER_ADMIN":
-        return {
-            "back_url": reverse("superadmin_dashboard"),
-            "back_label": "Back to Super Admin Dashboard",
-        }
-    if user.role == "ADMIN":
-        return {
-            "back_url": reverse("admin_dashboard"),
-            "back_label": "Back to Admin Dashboard",
-        }
-    if user.role == "MANAGER":
-        return {
-            "back_url": reverse("manager_dashboard"),
-            "back_label": "Back to Manager Dashboard",
-        }
-    return {
-        "back_url": reverse("sales_cashier_dashboard"),
-        "back_label": "Back to Cashier Dashboard",
-    }

@@ -43,7 +43,7 @@ class Supplier(TimeStampedModel):
 
 class Product(TimeStampedModel):
     name = models.CharField(max_length=150)
-    sku = models.CharField(max_length=50, unique=True, default="TEMP-SKU")
+    sku = models.CharField(max_length=50, unique=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -87,3 +87,42 @@ class Product(TimeStampedModel):
     @property
     def is_low_stock(self):
         return self.quantity <= self.low_stock_threshold
+
+
+class StockMovement(TimeStampedModel):
+    MOVEMENT_TYPES = (
+        ("IN", "Stock In"),
+        ("OUT", "Stock Out"),
+        ("SALE", "Sale"),
+        ("ADJUSTMENT", "Adjustment"),
+        ("RETURN", "Return"),
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="stock_movements"
+    )
+    movement_type = models.CharField(max_length=20, choices=MOVEMENT_TYPES)
+    quantity = models.IntegerField()
+    previous_quantity = models.IntegerField(default=0)
+    new_quantity = models.IntegerField(default=0)
+    reference = models.CharField(max_length=100, blank=True, null=True)
+    note = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="stock_movements_created"
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["movement_type"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.product.name} - {self.movement_type} - {self.quantity}"

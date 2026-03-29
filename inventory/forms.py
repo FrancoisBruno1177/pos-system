@@ -1,5 +1,5 @@
 from django import forms
-from .models import Category, Supplier, Product
+from .models import Category, Supplier, Product, StockMovement
 
 
 class CategoryForm(forms.ModelForm):
@@ -156,3 +156,40 @@ class ProductForm(forms.ModelForm):
             self.add_error("low_stock_threshold", "Low stock threshold cannot be negative.")
 
         return cleaned_data
+
+
+class StockMovementForm(forms.Form):
+    MOVEMENT_TYPES = (
+        ("IN", "Stock In"),
+        ("OUT", "Stock Out"),
+        ("ADJUSTMENT", "Adjustment"),
+        ("RETURN", "Return"),
+    )
+
+    movement_type = forms.ChoiceField(
+        choices=MOVEMENT_TYPES,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+    quantity = forms.IntegerField(
+        min_value=1,
+        widget=forms.NumberInput(attrs={
+            "class": "form-control",
+            "placeholder": "Quantity"
+        })
+    )
+    reference = forms.CharField(
+        required=False,
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Reference (optional)"
+        })
+    )
+    note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            "class": "form-control",
+            "rows": 4,
+            "placeholder": "Reason / note"
+        })
+    )

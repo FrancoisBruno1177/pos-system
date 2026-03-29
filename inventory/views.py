@@ -1,15 +1,22 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import CategoryForm, SupplierForm, ProductForm
-from .models import Category, Supplier, Product
+from .forms import CategoryForm, SupplierForm, ProductForm, StockMovementForm
+from .models import Category, Supplier, Product, StockMovement
 
 
 def inventory_access_required(user):
     return user.is_authenticated and (
         user.is_superuser or user.role in ["SUPER_ADMIN", "ADMIN", "MANAGER"]
+    )
+
+
+def inventory_manage_required(user):
+    return user.is_authenticated and (
+        user.is_superuser or user.role in ["SUPER_ADMIN", "ADMIN"]
     )
 
 
@@ -23,6 +30,7 @@ def inventory_dashboard(request):
     categories = Category.objects.all()
     suppliers = Supplier.objects.all()
     low_stock_products = products.filter(quantity__lte=F("low_stock_threshold"))
+    recent_movements = StockMovement.objects.select_related("product", "created_by")[:8]
 
     context = {
         "total_products": products.count(),
@@ -31,6 +39,7 @@ def inventory_dashboard(request):
         "total_suppliers": suppliers.count(),
         "low_stock_count": low_stock_products.count(),
         "low_stock_products": low_stock_products[:5],
+        "recent_movements": recent_movements,
     }
     return render(request, "inventory/dashboard.html", context)
 
@@ -69,7 +78,7 @@ def product_list(request):
         products = products.filter(quantity=0)
 
     context = {
-        "products": products,
+        "products": products.order_by("name"),
         "categories": Category.objects.filter(is_active=True),
         "suppliers": Supplier.objects.filter(is_active=True),
         "query": query,
@@ -82,7 +91,7 @@ def product_list(request):
 
 @login_required
 def product_create(request):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to create products.")
         return redirect("dashboard")
 
@@ -92,6 +101,18 @@ def product_create(request):
         product = form.save(commit=False)
         product.created_by = request.user
         product.save()
+
+        if product.quantity > 0:
+            StockMovement.objects.create(
+                product=product,
+                movement_type="IN",
+                quantity=product.quantity,
+                previous_quantity=0,
+                new_quantity=product.quantity,
+                reference="INITIAL STOCK",
+                note="Initial stock on product creation.",
+                created_by=request.user,
+            )
 
         messages.success(request, "Product created successfully.")
         return redirect("product_list")
@@ -113,22 +134,44 @@ def product_detail(request, pk):
         pk=pk
     )
 
+    recent_movements = product.stock_movements.select_related("created_by")[:10]
+
     return render(request, "inventory/product_detail.html", {
-        "product": product
+        "product": product,
+        "recent_movements": recent_movements,
     })
 
 
 @login_required
 def product_update(request, pk):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to edit products.")
         return redirect("dashboard")
 
     product = get_object_or_404(Product, pk=pk)
+    old_quantity = product.quantity
     form = ProductForm(request.POST or None, request.FILES or None, instance=product)
 
     if request.method == "POST" and form.is_valid():
-        form.save()
+        updated_product = form.save(commit=False)
+        new_quantity = updated_product.quantity
+        updated_product.save()
+
+        if new_quantity != old_quantity:
+            difference = new_quantity - old_quantity
+            movement_type = "IN" if difference > 0 else "OUT"
+
+            StockMovement.objects.create(
+                product=updated_product,
+                movement_type=movement_type,
+                quantity=abs(difference),
+                previous_quantity=old_quantity,
+                new_quantity=new_quantity,
+                reference="PRODUCT UPDATE",
+                note="Quantity changed from product edit form.",
+                created_by=request.user,
+            )
+
         messages.success(request, "Product updated successfully.")
         return redirect("product_list")
 
@@ -141,7 +184,7 @@ def product_update(request, pk):
 
 @login_required
 def product_delete(request, pk):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to delete products.")
         return redirect("dashboard")
 
@@ -174,7 +217,7 @@ def category_list(request):
 
 @login_required
 def category_create(request):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to create categories.")
         return redirect("dashboard")
 
@@ -193,7 +236,7 @@ def category_create(request):
 
 @login_required
 def category_update(request, pk):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to edit categories.")
         return redirect("dashboard")
 
@@ -214,7 +257,7 @@ def category_update(request, pk):
 
 @login_required
 def category_delete(request, pk):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to delete categories.")
         return redirect("dashboard")
 
@@ -247,7 +290,7 @@ def supplier_list(request):
 
 @login_required
 def supplier_create(request):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to create suppliers.")
         return redirect("dashboard")
 
@@ -266,7 +309,7 @@ def supplier_create(request):
 
 @login_required
 def supplier_update(request, pk):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to edit suppliers.")
         return redirect("dashboard")
 
@@ -287,7 +330,7 @@ def supplier_update(request, pk):
 
 @login_required
 def supplier_delete(request, pk):
-    if not inventory_access_required(request.user):
+    if not inventory_manage_required(request.user):
         messages.error(request, "You are not allowed to delete suppliers.")
         return redirect("dashboard")
 
@@ -300,4 +343,91 @@ def supplier_delete(request, pk):
 
     return render(request, "inventory/supplier_confirm_delete.html", {
         "supplier": supplier
+    })
+
+
+@login_required
+def stock_movement_list(request):
+    if not inventory_access_required(request.user):
+        messages.error(request, "You are not allowed to access stock history.")
+        return redirect("dashboard")
+
+    query = request.GET.get("q", "").strip()
+    movement_type = request.GET.get("type", "").strip()
+
+    movements = StockMovement.objects.select_related("product", "created_by").all()
+
+    if query:
+        movements = movements.filter(
+            Q(product__name__icontains=query) |
+            Q(product__sku__icontains=query) |
+            Q(reference__icontains=query) |
+            Q(note__icontains=query)
+        )
+
+    if movement_type:
+        movements = movements.filter(movement_type=movement_type)
+
+    context = {
+        "movements": movements,
+        "query": query,
+        "selected_type": movement_type,
+        "movement_types": StockMovement.MOVEMENT_TYPES,
+    }
+    return render(request, "inventory/stock_movement_list.html", context)
+
+
+@login_required
+@transaction.atomic
+def stock_adjustment_create(request, pk):
+    if not inventory_manage_required(request.user):
+        messages.error(request, "You are not allowed to adjust stock.")
+        return redirect("dashboard")
+
+    product = get_object_or_404(Product, pk=pk)
+    form = StockMovementForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        movement_type = form.cleaned_data["movement_type"]
+        quantity = form.cleaned_data["quantity"]
+        reference = form.cleaned_data["reference"]
+        note = form.cleaned_data["note"]
+
+        previous_quantity = product.quantity
+        new_quantity = previous_quantity
+
+        if movement_type in ["IN", "RETURN"]:
+            new_quantity = previous_quantity + quantity
+        elif movement_type == "OUT":
+            if quantity > previous_quantity:
+                messages.error(request, "Cannot remove more stock than available.")
+                return render(request, "inventory/stock_adjustment_form.html", {
+                    "form": form,
+                    "product": product,
+                })
+            new_quantity = previous_quantity - quantity
+        elif movement_type == "ADJUSTMENT":
+            new_quantity = quantity
+            quantity = abs(new_quantity - previous_quantity)
+
+        product.quantity = new_quantity
+        product.save(update_fields=["quantity"])
+
+        StockMovement.objects.create(
+            product=product,
+            movement_type=movement_type,
+            quantity=quantity,
+            previous_quantity=previous_quantity,
+            new_quantity=new_quantity,
+            reference=reference,
+            note=note,
+            created_by=request.user,
+        )
+
+        messages.success(request, "Stock adjusted successfully.")
+        return redirect("product_detail", pk=product.pk)
+
+    return render(request, "inventory/stock_adjustment_form.html", {
+        "form": form,
+        "product": product,
     })

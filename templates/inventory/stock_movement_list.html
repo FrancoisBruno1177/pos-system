@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stock History | POSIFY</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: #eef2ff;
+            background: linear-gradient(135deg, #071225, #0f172a, #13233f);
+        }
+        .page {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            text-decoration: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.10);
+            font-weight: 800;
+        }
+        .panel {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        .panel-body { padding: 18px; }
+        form {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        input, select {
+            background: rgba(15,23,42,.76);
+            color: white;
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+        button {
+            border: none;
+            border-radius: 14px;
+            padding: 12px 16px;
+            background: #2563eb;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .table-wrap {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            text-align: left;
+        }
+        th { color: #9aa8c7; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="topbar">
+            <div>
+                <h1>Stock Movement History</h1>
+                <p>Track every inventory change across the system.</p>
+            </div>
+            <a href="{% url 'inventory_dashboard' %}" class="btn">Back to Inventory</a>
+        </div>
+
+        <div class="panel">
+            <div class="panel-body">
+                <form method="get">
+                    <input type="text" name="q" placeholder="Search product, SKU or reference" value="{{ query }}">
+                    <select name="type">
+                        <option value="">All Types</option>
+                        {% for value, label in movement_types %}
+                            <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Filter</button>
+                </form>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Type</th>
+                                <th>Qty</th>
+                                <th>Previous</th>
+                                <th>New</th>
+                                <th>Reference</th>
+                                <th>Created By</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for movement in movements %}
+                                <tr>
+                                    <td>{{ movement.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>{{ movement.product.name }}</td>
+                                    <td>{{ movement.get_movement_type_display }}</td>
+                                    <td>{{ movement.quantity }}</td>
+                                    <td>{{ movement.previous_quantity }}</td>
+                                    <td>{{ movement.new_quantity }}</td>
+                                    <td>{{ movement.reference|default:"—" }}</td>
+                                    <td>{{ movement.created_by.email|default:"—" }}</td>
+                                    <td>{{ movement.note|default:"—" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="9">No stock movements found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
